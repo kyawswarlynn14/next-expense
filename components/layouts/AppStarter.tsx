@@ -1,19 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaArrowsDownToLine, FaTableList } from "react-icons/fa6";
 import { GiExpense } from "react-icons/gi";
 import { BiSolidCategory } from "react-icons/bi";
-import { IoLogOut } from "react-icons/io5";
 import { usePathname, useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { AppState } from "@/store";
 import { useLoadUserQuery } from "@/store/apiSlice";
-import { userLoggedOut } from "@/store/auth/authSlice";
 import { useGetCategoreisQuery } from "@/store/category/categoryApi";
 import { useGetItemsQuery } from "@/store/item/itemApi";
+import { CgProfile } from "react-icons/cg";
 
 const AppStarter = ({
     children,
@@ -22,22 +20,35 @@ const AppStarter = ({
 }>) => {
 	const pathname = usePathname();
 	const router = useRouter();
-    const dispatch = useDispatch();
 	const { user } = useSelector((state: AppState) => state.auth);
 	const { year } = useSelector((state: AppState) => state.item);
-    const { isLoading, error } = useLoadUserQuery();
-    const { isLoading: incomeCatLoading } = useGetCategoreisQuery("001");
-    const { isLoading: outcomeCatLoading } = useGetCategoreisQuery("002");
+    const { isLoading, isSuccess, error, data } = useLoadUserQuery();
+    const { isLoading: incomeCatLoading, refetch: incomeCatRefetch } = useGetCategoreisQuery("001");
+    const { isLoading: outcomeCatLoading, refetch: outcomeCatRefetch } = useGetCategoreisQuery("002");
     const { refetch: incomeRefetch } = useGetItemsQuery({ type: "001", year});
     const { refetch: outcomeRefetch } = useGetItemsQuery({ type: "002", year});
 
 	const isFirstRender = useRef(true);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(()=>{
-        if(!isLoading && (!user || error) && pathname !== '/register') {
-            router.push('/login');
+        if(!isLoading && isSuccess && data) {
+			setLoading(false);
+		}
+		if (error) {
+			setLoading(false);
+		}
+		if (!isFirstRender.current) {
+            incomeCatRefetch();
+            outcomeCatRefetch();
         }
-    }, [isLoading, user]);
+    }, [isSuccess, user, error, isLoading, data]);
+
+	useEffect(() => {
+        if(!loading && !(user?._id) && pathname !== '/register') {
+			router.push('/login')
+		}
+    }, [user, loading]);
 
 	useEffect(() => {
         if (isFirstRender.current) {
@@ -47,15 +58,6 @@ const AppStarter = ({
             outcomeRefetch();
         }
     }, [year]);
-
-	const handleSignout = () => {
-        try {
-            toast({description: "Sign out successfully!" });
-            dispatch(userLoggedOut());
-        } catch (error: any) {
-            toast({ variant: "destructive", description: error?.message ||"Something went wrong!" });
-        }
-	}
 
 	return (
 		<div className="w-full min-h-screen ">
@@ -87,14 +89,12 @@ const AppStarter = ({
 								link="/category"
 								icon={<BiSolidCategory />}
 							/>
-							<Button
-								variant={"outline"}
-								onClick={handleSignout}
-								className="flex items-center gap-2"
-							>
-								<span className="hidden md:block">Logout</span>
-								<IoLogOut />
-							</Button>
+
+							<NavButton
+								title="Profile"
+								link="/profile"
+								icon={<CgProfile />}
+							/>
 						</nav>
 					)}
 					<div>

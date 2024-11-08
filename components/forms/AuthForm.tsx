@@ -35,9 +35,9 @@ const AuthForm: React.FC<Props> = ({ isLogin }) => {
 	}, [user]);
 
 	useEffect(() => {
-		if (!loginLoading && loginSuccess) {
-			toast({ description: "Login successful!" });
+		if (loginSuccess) {
 			router.push("/");
+			toast({ description: "Login successful!" });
 		}
 		if(loginError) {
 			toast({
