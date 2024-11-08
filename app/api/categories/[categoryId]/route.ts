@@ -4,7 +4,7 @@ import { checkAuth } from '@/lib/middleware';
 import CategoryModel, { ICategory } from '@/models/CategoryModel';
 
 type TParams = {
-    params: { categoryId: string }
+    params: Promise<{ categoryId: string }>
 }
 
 export async function PATCH(request: NextRequest, { params }: TParams) {

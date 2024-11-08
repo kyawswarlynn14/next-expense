@@ -1,8 +1,8 @@
+import { deleteItem, updateItem } from '@/lib/common';
 import { NextRequest } from 'next/server';
-import { deleteItem, updateItem } from '../../incomes/[incomeId]/route';
 
 type TParams = {
-    params: { outcomeId: string }
+    params: Promise<{ outcomeId: string }>
 }
 
 const TYPE = "002";

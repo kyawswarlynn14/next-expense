@@ -5,7 +5,7 @@ import { checkUserRole } from '@/lib/middleware';
 
 // get one user
 type TParams = {
-    params: { userId: string }
+    params: Promise<{ userId: string }>
 }
 
 export async function GET(request: NextRequest, { params }: TParams) {

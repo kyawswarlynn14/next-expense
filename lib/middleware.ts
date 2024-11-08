@@ -19,6 +19,7 @@ export async function checkAuth(request: NextRequest, userId?: string): Promise<
     }
     return decoded;
   } catch (error) {
+    console.log('check user error >>', error)
     return NextResponse.json({ message: 'Invalid authentication token' }, { status: 401 });
   }
 }
@@ -38,6 +39,7 @@ export async function checkUserRole(request: NextRequest, allowedRoles: number[]
     
     return null;
   } catch (error) {
+    console.log('check user role error >>', error)
     return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
   }
 }
