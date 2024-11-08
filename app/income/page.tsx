@@ -49,7 +49,7 @@ const Income = () => {
 	const [selectedCategory, setSelectedCategory] = useState("");
 	const [filteredIncomes, setFilteredIncomes] = useState<TItem[]>([]);
 
-	const { isLoading, refetch } = useGetItemsQuery({ type: "002", year });
+	const { isLoading, refetch } = useGetItemsQuery({ type: "001", year });
 	const [deleteIncome, { isLoading: deleteLoading, isSuccess, error }] =
 		useDeleteItemMutation();
 

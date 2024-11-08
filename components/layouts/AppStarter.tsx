@@ -38,12 +38,6 @@ const AppStarter = ({
 		if (error) {
 			setLoading(false);
 		}
-		if (!isFirstRender.current) {
-            incomeCatRefetch();
-            outcomeCatRefetch();
-			incomeRefetch();
-            outcomeRefetch();
-        }
     }, [isSuccess, user, error, isLoading, data]);
 
 	useEffect(() => {
@@ -56,10 +50,12 @@ const AppStarter = ({
         if (isFirstRender.current) {
             isFirstRender.current = false;
         } else {
+			incomeCatRefetch();
+            outcomeCatRefetch();
             incomeRefetch();
             outcomeRefetch();
         }
-    }, [year]);
+    }, [year, user]);
 
 	return (
 		<div className="w-full min-h-screen ">
