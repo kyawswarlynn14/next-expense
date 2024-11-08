@@ -14,8 +14,6 @@ import ConfirmDialog from "@/components/layouts/ConfirmDialog";
 import { toast } from "@/hooks/use-toast";
 import MonthYearPicker from "@/components/layouts/MonthYearPicker";
 import { useEffect, useState } from "react";
-import OutcomeDetail from "@/components/details/OutcomeDetail";
-import OutcomeForm from "@/components/forms/OutcomeForm";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Select,
@@ -31,56 +29,58 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { CgMoreVerticalO } from "react-icons/cg";
 import { useSelector } from "react-redux";
 import { AppState } from "@/store";
 import { useDeleteItemMutation, useGetItemsQuery } from "@/store/item/itemApi";
 import { displayDate } from "@/lib/services";
-import { CgMoreVerticalO } from "react-icons/cg";
+import IncomeForm from "@/components/forms/IncomeForm";
+import IncomeDetail from "@/components/details/IncomeDetail";
 
-const Outcome = () => {
+const Income = () => {
 	const date = new Date();
-	const { year, outcomes } = useSelector((state: AppState) => state.item);
-	const { outcomeCategories } = useSelector(
+	const { year, incomes } = useSelector((state: AppState) => state.item);
+	const { incomeCategories } = useSelector(
 		(state: AppState) => state.category
 	);
 
 	const [month, setMonth] = useState(date.getMonth());
 	const [showAll, setShowAll] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState("");
-	const [filteredOutcomes, setFilteredOutcomes] = useState<TItem[]>([]);
+	const [filteredIncomes, setFilteredIncomes] = useState<TItem[]>([]);
 
 	const { isLoading, refetch } = useGetItemsQuery({ type: "002", year });
-	const [deleteOutcome, { isLoading: deleteLoading, isSuccess, error }] =
+	const [deleteIncome, { isLoading: deleteLoading, isSuccess, error }] =
 		useDeleteItemMutation();
 
 	useEffect(() => {
 		if (showAll) {
 			if (selectedCategory && selectedCategory !== "-") {
-				setFilteredOutcomes(
-					outcomes.filter(
-						(outcome) => outcome.category._id === selectedCategory
+				setFilteredIncomes(
+					incomes.filter(
+						(income) => income.category._id === selectedCategory
 					)
 				);
 			} else {
-				setFilteredOutcomes(outcomes);
+				setFilteredIncomes(incomes);
 			}
 		} else {
 			const data =
 				selectedCategory && selectedCategory !== "-"
-					? outcomes.filter((outcome) => {
-							const outcomeMonth = new Date(outcome.createdAt).getMonth();
-							return (
-								outcomeMonth === month &&
-								outcome.category._id === selectedCategory
-							);
-					  })
-					: outcomes.filter((outcome) => {
-							const outcomeMonth = new Date(outcome.createdAt).getMonth();
-							return outcomeMonth === month;
-					  });
-			setFilteredOutcomes(data);
+					? incomes.filter((income) => {
+						const incomeMonth = new Date(income.createdAt).getMonth();
+						return (
+							incomeMonth === month &&
+							income.category._id === selectedCategory
+						);
+					})
+					: incomes.filter((income) => {
+						const incomeMonth = new Date(income.createdAt).getMonth();
+						return incomeMonth === month;
+					});
+			setFilteredIncomes(data);
 		}
-	}, [selectedCategory, outcomes, showAll, month, year]);
+	}, [selectedCategory, incomes, showAll, month, year]);
 
 	useEffect(() => {
 		if (!deleteLoading && isSuccess) {
@@ -92,11 +92,11 @@ const Outcome = () => {
 				variant: "destructive",
 				description: (error as any)?.message || "Something went wrong!",
 			});
-			console.log("delete outcome error >>", error);
+			console.log("delete income error >>", error);
 		}
 	}, [deleteLoading, isSuccess, error]);
 
-	const totalAmount = filteredOutcomes.reduce(
+	const totalAmount = filteredIncomes.reduce(
 		(a, b) => a + Number(b.amount),
 		0
 	);
@@ -104,7 +104,7 @@ const Outcome = () => {
 	return (
 		<div className="w-[98%] md:w-[90%] lg:w-[80%]  mx-auto">
 			<div className="pt-4 flex justify-between items-center">
-				<OutcomeForm />
+				<IncomeForm />
 
 				<div className="flex items-center gap-2">
 					<Checkbox
@@ -133,7 +133,7 @@ const Outcome = () => {
 					<SelectContent>
 						<SelectGroup>
 							<SelectItem value={"-"}>All</SelectItem>
-							{outcomeCategories.map((i) => (
+							{incomeCategories.map((i) => (
 								<SelectItem key={i._id} value={i._id}>
 									{i.title}
 								</SelectItem>
@@ -146,7 +146,7 @@ const Outcome = () => {
 			</div>
 
 			<Table className="border border-slate-300 shadow-lg">
-				<TableCaption>A list of outcomes.</TableCaption>
+				<TableCaption>A list of incomes.</TableCaption>
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[25%] font-bold">Title</TableHead>
@@ -172,40 +172,34 @@ const Outcome = () => {
 					</TableBody>
 				) : (
 					<TableBody>
-						{[...filteredOutcomes]
-							.sort((a, b) => {
-								const dateA = new Date(a.createdAt);
-								const dateB = new Date(b.createdAt);
-								return dateB.getTime() - dateA.getTime();
-							})
-							.map((i) => (
-								<TableRow key={i._id}>
-									<TableCell className="font-medium">{i.title}</TableCell>
-									<TableCell>{Number(i.amount).toLocaleString()} MMK</TableCell>
-									<TableCell className="hidden md:block">
-										{i.category.title}
-									</TableCell>
-									<TableCell>{displayDate(i.createdAt)}</TableCell>
-									<TableCell className="flex items-center justify-center gap-2">
-										<Popover>
-											<PopoverTrigger>
-												<CgMoreVerticalO size={22} />
-											</PopoverTrigger>
-											<PopoverContent
-												side="left"
-												align="start"
-												className="w-36 space-y-1"
-											>
-												<OutcomeDetail item={i} />
-												<OutcomeForm isUpdate={true} item={i} />
-												<ConfirmDialog
-													fn={() => deleteOutcome({ type: "002", id: i._id })}
-												/>
-											</PopoverContent>
-										</Popover>
-									</TableCell>
-								</TableRow>
-							))}
+						{filteredIncomes.map((i) => (
+                            <TableRow key={i._id}>
+                                <TableCell className="font-medium">{i.title}</TableCell>
+                                <TableCell>{Number(i.amount).toLocaleString()} MMK</TableCell>
+                                <TableCell className="hidden md:block">
+                                    {i.category.title}
+                                </TableCell>
+                                <TableCell>{displayDate(i.createdAt)}</TableCell>
+                                <TableCell className="flex items-center justify-center gap-2">
+                                    <Popover>
+                                        <PopoverTrigger>
+                                            <CgMoreVerticalO size={22} />
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            side="left"
+                                            align="start"
+                                            className="w-36 space-y-1"
+                                        >
+                                            <IncomeDetail item={i} />
+                                            <IncomeForm isUpdate={true} item={i} />
+                                            <ConfirmDialog
+                                                fn={() => deleteIncome({ type: "001", id: i._id })}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </TableCell>
+                            </TableRow>
+						))}
 					</TableBody>
 				)}
 				<TableFooter>
@@ -219,4 +213,4 @@ const Outcome = () => {
 	);
 };
 
-export default Outcome;
+export default Income;
