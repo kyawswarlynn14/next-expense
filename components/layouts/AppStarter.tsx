@@ -41,6 +41,8 @@ const AppStarter = ({
 		if (!isFirstRender.current) {
             incomeCatRefetch();
             outcomeCatRefetch();
+			incomeRefetch();
+            outcomeRefetch();
         }
     }, [isSuccess, user, error, isLoading, data]);
 

@@ -133,6 +133,8 @@ export default function Profile() {
         }
 	}
 
+    if (!user) return null;
+
 	return (
         <div className="w-full px-2 py-4 md:pt-6 flex flex-col items-center justify-center">
             <Tabs defaultValue="account" className="w-full max-w-[400px]">
